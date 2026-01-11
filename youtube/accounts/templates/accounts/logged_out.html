@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+Sign Out
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+
+<div class="success-container">
+    <h1>Signed Out</h1>
+    <p>You have been signed out...</p>
+    <a href="{% url 'accounts:login' %}" class="btn btn-primary">Sign In Again</a>
+</div>
+
+{% endblock content %}
