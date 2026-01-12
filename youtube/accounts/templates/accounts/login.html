@@ -19,8 +19,37 @@ Sign In
     
     <form method="post" class="auth-form">
         {% csrf_token %}
-          
+         
+        {% if form.errors %}
+            <ul class="error-list">
+                {% for field in form %}
+                    {% for err in field.errors %}
+                        <li>{{err}}</li>
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{error}}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="id_username">Username</label>
+            <input type="text" name="username" id="id_username" class="form-input"
+                placeholder="Enter your username" required autofocus>
+        </div>
+
+        <div class="form-group">
+            <label for="id_password">Password</label>
+            <input type="password" name="password" id="id_password" class="form-input"
+                placeholder="Enter your passowrd" required>
+        </div>
+
+        <button type="submit" class="btn-submit">Sing In</button>
     </form>
+
+    <div class="auth-footer">
+        Don't have an account? <a href="{% url 'accounts:register' %}">Register</a>
+    </div>
 </div>
 
 {% endblock content %}
