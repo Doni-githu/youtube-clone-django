@@ -25,16 +25,16 @@ Sign In
                 {% for field in form %}
                     {% for err in field.errors %}
                         <li>{{err}}</li>
+                    {% endfor %}
                 {% endfor %}
                 {% for error in form.non_field_errors %}
                     <li>{{error}}</li>
                 {% endfor %}
             </ul>
         {% endif %}
-
         <div class="form-group">
             <label for="id_username">Username</label>
-            <input type="text" name="username" id="id_username" class="form-input"
+            <input type="text" value="{{forms.username.value}}" name="username" id="id_username" class="form-input"
                 placeholder="Enter your username" required autofocus>
         </div>
 
@@ -51,5 +51,4 @@ Sign In
         Don't have an account? <a href="{% url 'accounts:register' %}">Register</a>
     </div>
 </div>
-
 {% endblock content %}
