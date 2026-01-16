@@ -1,3 +1,67 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
-# Create your views here.
+from .models import Video
+from .forms import VideoUploadForm
+from .imagekit_client import upload_thumbnail, upload_video
+
+@require_POST
+@login_required # type: ignore
+def video_upload(request):
+    form = VideoUploadForm(request.POST,request.FILES)
+
+    if form.is_valid():
+        video_file = form.cleaned_data.get('video_file')
+        custom_thumbnail =request.POST.get('thumbnail_data', '')
+
+        try:
+            result = upload_video(
+                file_data=video_file.read(), # type: ignore
+                file_name=video_file.name, # type: ignore
+            )
+
+            thumbnail_url = ""
+            if custom_thumbnail and custom_thumbnail.startswith("data:image"):
+                try:
+                    base_name = video_file.name.split(".", 1)[0] # type: ignore
+                    thumnail_result = upload_thumbnail(
+                        file_data=custom_thumbnail,
+                        file_name=base_name + "_thumb.jpg"
+                    )
+                    thumbnail_url = thumnail_result['url']
+                except Exception as e:
+                    pass
+            video = Video.objects.create(
+                user=request.user,
+                title=form.cleaned_data['title'],
+                description=form.cleaned_data['description'],
+                file_id=result['file_id'],
+                video_url=result["url"],
+                thumbnail_url=thumbnail_url
+            )
+            return JsonResponse({
+                "success": True,
+                "video_id": video.id, # type: ignore
+                "messsage":"Video upload successfully"
+            })
+
+        except Exception as e:
+            return JsonResponse({
+                "success": False,
+                "error": str(e)
+            })
+        
+    errors = []
+    for field, field_errors in form.errors.items():
+        for error in field_errors:
+            errors.append(f"{field}: {error}" if field != "__all__" else error)
+    return JsonResponse({
+        "success": False,
+        "errors": ";".join(errors)
+    })
+
+@login_required
+def video_upload_page(request):
+    return render(request=request, "videos/upload.html", {form: VideoUploadForm}) # type: ignore
