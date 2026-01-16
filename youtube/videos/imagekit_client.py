@@ -5,25 +5,24 @@ def get_imagekit_client():
     return ImageKit()
 
 def upload_video(file_data:bytes, file_name:str, folder: str= "videos") -> dict:
-    public_key = os.environ.get('IMAGE_KIT_PUBLIC_KEY')
-    private_key = os.environ.get('IMAGE_KIT_PRIVATE_KEY')
+    public_key = os.environ.get('IMAGE_KIT_PUBLIC_KEY', '')
 
     client = get_imagekit_client()
 
     response = client.files.upload(
-        file_data=file_data, # type: ignore
+        file=file_data,
         file_name=file_name,
-        public_key=public_key,
         folder=folder,
+        public_key=public_key
     )
 
 
-    return {'file_id':response.id,"url": response.url}
+    return {'file_id':response.id,"url": response.url} # type: ignore
 
 
 def upload_thumbnail(file_data:bytes, file_name:str, folder: str= "thumbnails"):
     import base64
-    public_key = os.environ.get('IMAGE_KIT_PUBLIC_KEY')
+    public_key = os.environ.get('IMAGE_KIT_PUBLIC_KEY', '')
 
     if file_data.startswith('data:'): # type: ignore
         base64_data = file_data.split(",", 1)[1] # type: ignore
@@ -36,7 +35,7 @@ def upload_thumbnail(file_data:bytes, file_name:str, folder: str= "thumbnails"):
         file=image_bytes,
         file_name=file_name,
         folder=folder,
-        public_key=public_key # type: ignore
+        public_key=public_key
     )
-    return {'file_id':response.id,"url": response.url} # type: ignore
+    return {'file_id':response.file_id,"url": response.url} # type: ignore
     

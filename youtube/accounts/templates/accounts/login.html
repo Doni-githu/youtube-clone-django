@@ -34,7 +34,7 @@ Sign In
         {% endif %}
         <div class="form-group">
             <label for="id_username">Username</label>
-            <input type="text" value="{{forms.username.value}}" name="username" id="id_username" class="form-input"
+            <input type="text" value="{{ forms.username.value|default:'' }}" name="username" id="id_username" class="form-input"
                 placeholder="Enter your username" required autofocus>
         </div>
 
