@@ -1,5 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
+from .imagekit_client import (
+    get_optimized_video_url,
+    get_streaming_url,
+    get_thumbnail_url
+)
 
 class Video(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE,related_name="videos")
@@ -8,7 +13,7 @@ class Video(models.Model):
 
     file_id = models.CharField(max_length=200)
     video_url = models.URLField(max_length=500)
-    thumnail_url= models.URLField(max_length=500)
+    thumbnail_url= models.URLField(max_length=500)
 
     views = models.PositiveIntegerField(default=0)
     likes = models.PositiveIntegerField(default=0)
@@ -20,5 +25,51 @@ class Video(models.Model):
     class Meta:
         ordering = ["-created_at"]
     
+    @property
+    def display_thumbnail_url(self):
+        if self.thumbnail_url and "/thumbnails/" in self.thumbnail_url:
+            return self.thumbnail_url
+        return self.generated_thumbnail_url
+    @property
+    def generated_thumbnail_url(self):
+        if not self.video_url:
+            return ""
+        return get_thumbnail_url(self.video_url)
+    
+    @property
+    def streaming_url(self):
+        if not self.video_url:
+            return ""
+        return get_streaming_url(self.video_url)
+    
+    @property
+    def optimized_video_url(self):
+        if not self.video_url:
+            return ""
+        return get_optimized_video_url(self.video_url)
+
     def __str__(self) -> str:
         return self.title
+    
+class VideoVote(models.Model):
+    LIKE = 1
+    DISLIKE = -1
+    LIKE_CHOICES = [
+        (LIKE, "Like"),
+        (DISLIKE, "Dislike")
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    video = models.ForeignKey(Video, on_delete=models.CASCADE, related_name="user_likes")
+    value = models.SmallIntegerField(choices=LIKE_CHOICES)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+    class Meta:
+        unique_together = ["user", "video"]
+
+    def __str__(self) -> str:
+        action  = "liked" if self.value == self.LIKE else "disliked"
+
+        return f"{self.user.username} action {self.video.title}"

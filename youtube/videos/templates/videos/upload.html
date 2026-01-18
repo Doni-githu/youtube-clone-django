@@ -87,7 +87,6 @@ const $ = id => document.getElementById(id)
 $("id_video_file").onchange = e => {
     const file = e.target.files[0]
     $("video-label").textContent = file ? `${file.name}` : "Click to select a video file"
-
 }
 
 $("customThumbnail").onchange = e => {
@@ -97,21 +96,22 @@ $("customThumbnail").onchange = e => {
     reader.onload = ev => {
         $("thumbPreview").src = ev.target.result
         $("thumbPreview").classList.add("visible")
-        $("thumb-label").style.display = "none";
-        $("thumbnail_data").value = ev.target.result;
-
+        $("thumb-label").style.display = "none"
+        $("thumbnailData").value = ev.target.result;
     }
 
     reader.readAsDataURL(file)
 }
 
+
 $("uploadForm").onsubmit = async e => {
     e.preventDefault()
-    if(!$("id_video_file").files.length || !$("id_title").value.trim()) return;
-    
+
+    if (!$("id_video_file").files.length || !$("id_title").value.trim()) return;
+
     $("uploadOverlay").classList.add("active")
     $("submitBtn").disabled = true;
-    $("error-container").innerHTML = ""
+    $('errorContainer').innerHtml = ""
     window.onbeforeunload = () => "Upload in progress"
 
     try {
@@ -122,21 +122,21 @@ $("uploadForm").onsubmit = async e => {
         const data = await res.json()
         window.onbeforeunload = null;
 
-        if(data.success){
-            $("uploadStatus").textContent = "Upload complete!";
-            setTimeout(() => location.href= "{% url 'videos:upload' %}", 500) // change to list
-        }else{ 
+        if (data.success) {
+            $('uploadStatus').textContent = "Upload complete!"
+            setTimeout(() => location.href = '{% url "videos:home" %}', 500)
+        } else {
             throw new Error(data.error)
         }
-    } catch (error) {
+    } catch (err) {
         window.onbeforeunload = null;
         $("uploadOverlay").classList.remove("active")
         $("submitBtn").disabled = false;
-        $("errorContainer").innerHTML = `<ul class="error-list">
-                <li>${error.message || "Upload failed"}</li>
-            </ul>`  
+        $('errorContainer').innerHTML = `<ul class="error-list"><li>${err.message || "Upload failed"}</li></ul>`
     }
 }
+
+
 </script>
 {% endblock %}
 

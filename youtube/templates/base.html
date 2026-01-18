@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %} - Youtube Clone{% endblock %}</title>
+    <title>{% block title %}{% endblock %}  Youtube Clone</title>
     <link rel="stylesheet" href="{% static 'css/variables.css' %}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
@@ -27,7 +27,7 @@
         <ul class="navbar-nav">
             {% if user.is_authenticated %}
             <li><a href="{% url 'videos:upload' %}" class="nav-link btn-upload">Upload</a></li>
-            <li><span class="nav-username">{{ user.username }}</span></li>
+            <li><a class="nav-username" style="text-decoration: none;" href="{% url 'videos:channel' user.username %}">{{ user.username }}</a></li>
             <li>
                 <form method="post" action="{% url 'accounts:logout' %}" class="logout-form">
                     {% csrf_token %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{channel_name}}- {% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/videos.css'%}">
+{% endblock %}
+
+{% block content %}
+<div class="channel-header">
+    <div class="channel-avatar">{{channel_name|slice:":1"}}</div>
+    <h1>{{channel_name}}</h1>
+</div>
+
+{% if videos %}
+    <h2 style="margin-bottom: 10px;">Videos</h2>
+    <div class="video-grid">
+        {% for video in videos %}
+            <a href="{% url 'videos:detail' video.id %}" class="video-card">
+                <div class="video-thumbnail">
+                    <img src="{{ video.display_thumbnail_url }}" alt="{{video.title}}" loading="lazy">
+                    <span class="play-icon">▶️</span>
+                </div>
+                <div class="video-info">
+                    <h3>{{video.title}}</h3>
+                    <p class="video-meta">{{video.views}} views</p>
+                </div>
+            </a>
+        {% endfor %}
+    </div>
+{% else %}
+
+<div class="empty-state">
+    <span class="empty-icon">🎬</span>
+    <h2>No videos Yet</h2>
+    <p>This channel hasn't uploaded videos yet</p>
+</div>
+
+{% endif %}
+
+{% endblock %}
