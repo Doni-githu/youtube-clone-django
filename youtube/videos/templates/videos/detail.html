@@ -5,7 +5,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/videos.css'%}">
-<link rel="stylesheet" href="{% static 'css/video_player.css'%}">
+<link rel="stylesheet" href="{% static 'css/videoplayer.css'%}">
 {% endblock %}
 
 {% block content %}
@@ -23,10 +23,10 @@
         <div class="video-stats">
             <span class="video-stats-left">{{video.views}} views | {{video.created_at|date:"M d, Y"}}</span>
             <div class="video-actions">
-                <button class="vote-btn" data-vote="like" onclick="vote({{video.id}}, 'like')">
+                <button class="vote-btn {% if user_vote == 1 %}active{% endif %}" data-vote="like" onclick="vote({{video.id}}, 'like')">
                     Likes <span id="like-count">{{video.likes}}</span>
                 </button>
-                <button class="vote-btn" data-vote="like" onclick="vote({{video.id}}, 'dislike')">
+                <button class="vote-btn {% if user_vote == 1 %}active{% endif %}" data-vote="dislike" onclick="vote({{video.id}}, 'dislike')">
                     Dislikes <span id="dislike-count">{{video.dislikes}}</span>
                 </button>
             </div>
@@ -98,6 +98,32 @@ function deleteVideo(videoId) {
         }).catch(() => {
             alert("Failed to delete.")
         })
+}
+
+function vote(videoId, voteType) {
+    {% if not user.is_authenticated %}
+    window.location.href = '{% url "accounts:login" %}'
+    return
+    {% endif %}
+
+
+    fetch(`/${videoId}/vote/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": csrf
+        },
+        body: `vote=${voteType}`
+    }).then(res => res.json()).then(data => {
+        document.getElementById("like-count").textContent = data.likes
+        document.getElementById("dislike-count").textContent = data.dislikes
+        document.querySelectorAll(".vote-btn").forEach((item) => {
+            item.classList.remove("active")
+        })
+        if(data.user_vote === 1)document.querySelector('[data-vote="like"]').classList.add("active")
+        else if(data.user_vote === -1) document.querySelector('[data-vote="dislike"]').classList.add("active")
+    })
+
 }
 
 </script>

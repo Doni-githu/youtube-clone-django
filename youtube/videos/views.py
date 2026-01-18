@@ -76,7 +76,13 @@ def video_detail(request, video_id):
     video.views +=1
     video.save(update_fields=["views"])
 
-    return render(request, "videos/detail.html", {"video": video})
+    user_vote = None
+    if request.user.is_authenticated:
+        vote = VideoVote.objects.filter(user=request.user, video=video).first()
+        if vote:
+            user_vote = vote.value
+
+    return render(request, "videos/detail.html", {"video": video, "user_vote": user_vote})
 
 def channel_videos(request, username):
     videos = Video.objects.filter(user__username=username)
@@ -132,5 +138,11 @@ def video_vote(request, video_id):
         else:
             video.dislikes -=1
         user_vote = value
-    video.save(update_fields=["likes", "dislikes"])
     
+    video.save(update_fields=["likes", "dislikes"])
+
+    return JsonResponse({
+        "likes": video.likes,
+        "dislikes": video.dislikes,
+        "user_vote": user_vote
+    })
