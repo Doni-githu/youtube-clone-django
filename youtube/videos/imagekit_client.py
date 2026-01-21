@@ -1,4 +1,5 @@
 import os
+import re
 from imagekitio import ImageKit
 
 def get_imagekit_client():
@@ -15,10 +16,32 @@ def get_streaming_url(base_url):
 
 def get_thumbnail_url(
         base_url:str,
-        width: int=480, 
-        height: int=270
+        username: str = '',
 ) -> str:
-    return f"{base_url}/ik-thumbnail.jpg" 
+    transformation = _get_watermark_transformation(username)
+
+    return f"{base_url}/ik-thumbnail.jpg?tr={transformation}" 
+
+def add_image_watermark(
+        base_url:str,
+        username: str = '',
+) -> str:
+    transformation = _get_watermark_transformation(username)
+    return f"{base_url}?tr={transformation}" 
+
+
+def _get_watermark_transformation(username:str) -> str:
+    return "".join((
+        "l-text,",
+        f"i-{username},",
+        "lfo-bottom_left,",
+        "lx-10,ly-10,",
+        "fs-16,",
+        "co-FFFFFF,",
+        "bg-00000060,",
+        "pa-4_4,",
+        "l-end"
+    ))
 
 
 def delete_video(file_id: str) -> bool:

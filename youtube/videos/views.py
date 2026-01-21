@@ -10,7 +10,7 @@ from .imagekit_client import delete_video, upload_thumbnail, upload_video
 
 @require_POST
 @login_required
-def video_upload(request):
+def video_upload(request): # Uploading to the imagekit
     form = VideoUploadForm(request.POST, request.FILES)
     if form.is_valid():
         video_file = form.cleaned_data['video_file']
@@ -23,7 +23,7 @@ def video_upload(request):
             )
 
             thumbnail_url = ""
-            if custom_thumbnail and custom_thumbnail.startswith("data:image"):
+            if custom_thumbnail and custom_thumbnail.startswith("data:image"): # making a custom thumbnail for video
                 try:
                     base_name = video_file.name.rsplit(".", 1)[0]
                     thumb_result = upload_thumbnail(
@@ -54,7 +54,7 @@ def video_upload(request):
             return JsonResponse({"success": False, "error": str(e)})
 
     errors = []
-    for field, field_errors in form.errors.items():
+    for field, field_errors in form.errors.items(): # Checking if the any exception
         for error in field_errors:
             errors.append(f"{field}: {error}" if field != "__all__" else error)
     return JsonResponse({"success": False, "errors": ";".join(errors)})
@@ -66,11 +66,11 @@ def video_upload_page(request):
 
 
 
-def video_list(request):
+def video_list(request): # for home page 
     videos = Video.objects.all()
     return render(request, 'videos/home.html', {"videos": videos})  
 
-def video_detail(request, video_id):
+def video_detail(request, video_id): # giving the detail
     video = get_object_or_404(Video.objects, id=video_id)
     
     video.views +=1
@@ -81,7 +81,6 @@ def video_detail(request, video_id):
         vote = VideoVote.objects.filter(user=request.user, video=video).first()
         if vote:
             user_vote = vote.value
-
     return render(request, "videos/detail.html", {"video": video, "user_vote": user_vote})
 
 def channel_videos(request, username):
@@ -89,11 +88,12 @@ def channel_videos(request, username):
     return render(request, "videos/channel.html", {"videos": videos, "channel_name": username})
 
 @login_required
-@require_POST
+@require_POST # request require POST and It for delete a video if the user own the video
 def delete_video_view(request, video_id):
-    video = get_object_or_404(Video, id=video_id, user=request.user)
+    video = get_object_or_404(Video, id=video_id, user=request.user) # Automatically raise Exection so i don't need to do anything
+    
     try:
-        delete_video(video.file_id)
+        delete_video(video.file_id) # main login for deleting image from imagekit in this
     except Exception as e:
         print(e)
         pass
@@ -111,9 +111,9 @@ def video_vote(request, video_id):
         return JsonResponse({"success": False, "error": "Invalid vote"}, status=400)
     
     value = VideoVote.LIKE if vote_type == "like" else VideoVote.DISLIKE
-    
     existing_vote = VideoVote.objects.filter(user=request.user, video=video).first()
-    if existing_vote:
+
+    if existing_vote: # if exist so I wil just change or delete existing
         if existing_vote.value == value:
             if value == VideoVote.LIKE:
                 video.likes -=1
@@ -131,7 +131,7 @@ def video_vote(request, video_id):
             existing_vote.value = value
             existing_vote.save()
             user_vote = value
-    else:
+    else: # if it is not, I just add one vote for user and apply video
         VideoVote.objects.create(user=request.user, video=video, value=value)
         if value == VideoVote.LIKE:
             video.likes +=1
