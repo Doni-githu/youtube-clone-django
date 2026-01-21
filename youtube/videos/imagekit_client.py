@@ -1,5 +1,4 @@
 import os
-import re
 from imagekitio import ImageKit
 
 def get_imagekit_client():
