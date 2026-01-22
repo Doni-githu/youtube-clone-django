@@ -1,5 +1,5 @@
 import os
-from imagekitio import ImageKit
+from imagekitio import ImageKit # type: ignore
 
 def get_imagekit_client():
     return ImageKit()
