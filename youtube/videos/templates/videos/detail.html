@@ -61,25 +61,23 @@ const videoPlayer = document.getElementById("video-player")
 const videoError = document.getElementById("video-error")
 const streamingUrl = "{{ video.streaming_url }}"
 const fallbackUrl = '{{ video.optimized_url }}'
-
-if(Hls.isSupported()){
+if (Hls.isSupported()) {
     const hls = new Hls({
-        startlevel: -1,
+        startLevel: -1,
         capLevelToPlayerSize: true
     })
     hls.loadSource(streamingUrl)
     hls.attachMedia(videoPlayer)
     hls.on(Hls.Events.ERROR, (event, data) => {
-        if(data.fatal){
+        if (data.datal) {
             videoPlayer.src = fallbackUrl
         }
     })
-}else if(videoPlayer.canPlayType("application/vnd.apple.mpegurl")){
+} else if (videoPlayer.canPlayType("application/vnd.apple.mpegurl")) {
     videoPlayer.src = streamingUrl
-}else{
+} else {
     videoPlayer.src = fallbackUrl
 }
-
 videoPlayer.addEventListener("error", () => {
     videoPlayer.style.display = "none";
     videoError.style.display = "flex"
