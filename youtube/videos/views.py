@@ -113,6 +113,7 @@ def video_vote(request, video_id):
     value = VideoVote.LIKE if vote_type == "like" else VideoVote.DISLIKE
     existing_vote = VideoVote.objects.filter(user=request.user, video=video).first()
 
+
     if existing_vote: # if exist so I wil just change or delete existing
         if existing_vote.value == value:
             if value == VideoVote.LIKE:
@@ -136,7 +137,7 @@ def video_vote(request, video_id):
         if value == VideoVote.LIKE:
             video.likes +=1
         else:
-            video.dislikes -=1
+            video.dislikes +=1
         user_vote = value
     
     video.save(update_fields=["likes", "dislikes"])
